@@ -107,7 +107,7 @@
 
         <!-- Back Link -->
         <div class="absolute top-8 right-8">
-            <a href="../index.html"
+            <a href="../index.php"
                 class="text-sm font-medium text-gray-500 hover:text-gray-900 flex items-center gap-1">
                 Back to Home <i class="ph ph-arrow-right"></i>
             </a>

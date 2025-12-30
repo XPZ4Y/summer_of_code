@@ -110,7 +110,7 @@
             <div class="flex justify-between h-16">
                 <!-- Logo Area -->
                 <div class="flex items-center">
-                    <a href="../index.html" class="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
+                    <a href="../index.php" class="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
                         <div
                             class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white group-hover:bg-gray-800 transition">
                             <i class="ph ph-arrow-left text-xl"></i>
