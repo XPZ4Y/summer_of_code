@@ -131,15 +131,15 @@
 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="./webpages/about.html"
+                    <a href="./webpages/about.php"
                         class="nav-link text-gray-600 hover:text-gsoc-blue font-medium transition">About</a>
-                    <a href="./webpages/timeline.html"
+                    <a href="./webpages/timeline.php"
                         class="nav-link text-gray-600 hover:text-gsoc-blue font-medium transition">Timeline</a>
-                    <a href="./webpages/projects.html"
+                    <a href="./webpages/projects.php"
                         class="nav-link text-gray-600 hover:text-gsoc-blue font-medium transition">Projects</a>
-                    <a href="./webpages/help.html"
+                    <a href="./webpages/help.php"
                         class="nav-link text-gray-600 hover:text-gsoc-blue font-medium transition">Help</a>
-                    <a href="./webpages/login.html"
+                    <a href="./webpages/login.php"
                         class="bg-gsoc-blue text-white px-5 py-2 rounded-md font-medium hover:bg-blue-600 transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5">Sign
                         in</a>
                 </div>
@@ -156,16 +156,16 @@
         <!-- Mobile Menu Panel -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="./webpages/about.html"
+                <a href="./webpages/about.php"
                     class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gsoc-blue hover:bg-blue-50">About</a>
-                <a href="./webpages/timeline.html"
+                <a href="./webpages/timeline.php"
                     class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gsoc-blue hover:bg-blue-50">Timeline</a>
-                <a href="./webpages/projects.html"
+                <a href="./webpages/projects.php"
                     class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gsoc-blue hover:bg-blue-50">Projects</a>
-                <a href="./webpages/help.html"
+                <a href="./webpages/help.php"
                     class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gsoc-blue hover:bg-blue-50">Help</a>
                 <div class="pt-4 pb-2">
-                    <a href="./webpages/login.html"
+                    <a href="./webpages/login.php"
                         class="block w-full text-center bg-gsoc-blue text-white px-5 py-3 rounded-md font-medium hover:bg-blue-600">Sign
                         in</a>
                 </div>
@@ -199,11 +199,11 @@
                     </p>
                     <div
                         class="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0 flex flex-col sm:flex-row gap-4">
-                        <a href="./webpages/login.html  "
+                        <a href="./webpages/login.php"
                             class="flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gsoc-blue hover:bg-blue-700 md:py-4 md:text-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-1">
                             Get Started
                         </a>
-                        <a href="./webpages/about.html"
+                        <a href="./webpages/about.php"
                             class="flex items-center justify-center px-8 py-3 border border-gray-300 text-base font-medium rounded-md text-gsoc-blue bg-white hover:bg-gray-50 md:py-4 md:text-lg transition">
                             Learn More
                         </a>
@@ -246,7 +246,7 @@
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Link Card 1 -->
-                <a href="./webpages/contributors.html"
+                <a href="./webpages/contributors.php"
                     class="group block p-6 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md hover:border-gsoc-blue transition duration-200">
                     <div class="flex items-center justify-between mb-4">
                         <div class="p-2 bg-blue-100 rounded-lg text-gsoc-blue">
@@ -259,7 +259,7 @@
                 </a>
 
                 <!-- Link Card 2 -->
-                <a href="./webpages/mentor_guide.html"
+                <a href="./webpages/mentor_guide.php"
                     class="group block p-6 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md hover:border-gsoc-green transition duration-200">
                     <div class="flex items-center justify-between mb-4">
                         <div class="p-2 bg-green-100 rounded-lg text-gsoc-green">
@@ -272,7 +272,7 @@
                 </a>
 
                 <!-- Link Card 3 -->
-                <a href="./webpages/faq.html"
+                <a href="./webpages/faq.php"
                     class="group block p-6 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md hover:border-gsoc-yellow transition duration-200">
                     <div class="flex items-center justify-between mb-4">
                         <div class="p-2 bg-yellow-100 rounded-lg text-gsoc-yellow">
@@ -285,7 +285,7 @@
                 </a>
 
                 <!-- Link Card 4 -->
-                <a href="./webpages/rules.html"
+                <a href="./webpages/rules.php"
                     class="group block p-6 bg-gray-50 rounded-xl border border-gray-100 hover:shadow-md hover:border-gsoc-red transition duration-200">
                     <div class="flex items-center justify-between mb-4">
                         <div class="p-2 bg-red-100 rounded-lg text-gsoc-red">
@@ -386,7 +386,7 @@
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">Ready to start coding?</h2>
             <p class="text-lg text-gray-500 mb-8">Join Now!!</p>
-            <a href="./webpages/login.html"> <button
+            <a href="./webpages/login.php"> <button
                     class="bg-gsoc-blue text-white font-bold py-3 px-8 rounded-md shadow-lg hover:bg-blue-600 transition transform hover:scale-105">
                     Register Now
                 </button></a>
@@ -409,16 +409,16 @@
                 <div>
                     <h4 class="font-semibold text-gray-900 mb-4">Program</h4>
                     <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="./webpages/about.html" class="hover:text-gsoc-blue">About</a></li>
-                        <li><a href="./webpages/timeline.html" class="hover:text-gsoc-blue">Timeline</a></li>
-                        <li><a href="./webpages/projects.html" class="hover:text-gsoc-blue">projects</a></li>
+                        <li><a href="./webpages/about.php" class="hover:text-gsoc-blue">About</a></li>
+                        <li><a href="./webpages/timeline.php" class="hover:text-gsoc-blue">Timeline</a></li>
+                        <li><a href="./webpages/projects.php" class="hover:text-gsoc-blue">projects</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="font-semibold text-gray-900 mb-4">Resources</h4>
                     <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="./webpages/help.html" class="hover:text-gsoc-blue">Help Center</a></li>
-                        <li><a href="./webpages/help.html" class="hover:text-gsoc-blue">Contact</a></li>
+                        <li><a href="./webpages/help.php" class="hover:text-gsoc-blue">Help Center</a></li>
+                        <li><a href="./webpages/help.php" class="hover:text-gsoc-blue">Contact</a></li>
                         <!--   <li><a href="#" class="hover:text-gsoc-blue">Blog</a></li> -->
                     </ul>
                 </div>
@@ -437,7 +437,7 @@
                 <div class="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center">
                     <p class="text-sm text-gray-400">&copy; 2025-2026 Slugworks</p>
                     <div class="flex space-x-6 mt-4 md:mt-0 text-sm text-gray-500">
-                        <a href="./webpages/privacy.html" class="hover:text-gray-900">Privacy & Terms</a>
+                        <a href="./webpages/privacy.php" class="hover:text-gray-900">Privacy & Terms</a>
 
                     </div>
                 </div>
