@@ -134,7 +134,7 @@
             <div class="flex justify-between h-16">
                 <!-- Logo Area -->
                 <div class="flex items-center">
-                    <a href="../index.html" class="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
+                    <a href="../index.php" class="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
                         <div
                             class="w-10 h-10 bg-gsoc-blue rounded-full flex items-center justify-center text-white group-hover:bg-blue-600 transition">
                             <i class="ph ph-arrow-left text-xl"></i>
@@ -193,7 +193,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center md:text-left">
                 <div class="flex items-center justify-center md:justify-start gap-2 text-sm text-gray-500 mb-4">
-                    <a href="../index.html" class="hover:text-gsoc-blue">Home</a>
+                    <a href="../index.php" class="hover:text-gsoc-blue">Home</a>
                     <i class="ph ph-caret-right text-xs"></i>
                     <span class="text-gray-900 font-medium">Contributor Guide</span>
                 </div>

@@ -172,7 +172,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center md:text-left">
                 <div class="flex items-center justify-center md:justify-start gap-2 text-sm text-gray-500 mb-4">
-                    <a href="../index.html" class="hover:text-gray-900">Home</a>
+                    <a href="../index.php" class="hover:text-gray-900">Home</a>
                     <i class="ph ph-caret-right text-xs"></i>
                     <span class="text-gray-900 font-medium">Privacy & Terms</span>
                 </div>
