@@ -107,7 +107,7 @@
         <!-- Mobile Header (Visible only on mobile) -->
         <div class="lg:hidden mb-8 text-center pt-8">
             <a href="../index.php" class="inline-flex items-center gap-2 text-xl font-bold text-gray-800">
-                <i class="ph ph-code text-gsoc-blue"></i> Slugworks SOESoC
+                <i class="ph ph-code text-gsoc-blue"></i>  SOESoC
             </a>
         </div>
 
@@ -516,13 +516,6 @@ else{
 }
 }
 
-
-
-
-
-
-
-
 ?>
 
 <?php
@@ -556,8 +549,5 @@ if(isset($_POST['mentor_login'])){
     }
 }
 }
-
-
-
 
 ?>
