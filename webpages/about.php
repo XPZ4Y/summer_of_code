@@ -138,7 +138,7 @@
                 <div class="flex items-center space-x-4">
                     <span class="hidden md:block text-sm text-gray-500">Contact Us at <a
                             href="mailto:contact@slugworks.org"
-                            class="text-gsoc-blue hover:underline">acookieforabaddie@</a></span>
+                            class="text-gsoc-blue hover:underline">contact@slugworks.org</a></span>
                 </div>
             </div>
         </div>
@@ -202,7 +202,14 @@
                         class="sidebar-link group flex items-center px-3 py-2 text-sm font-medium text-gsoc-blue border-l-4 border-gsoc-blue bg-blue-50">
                         <span class="truncate">Mission</span>
                     </a>
-                    
+                    <a href="#history"
+                        class="sidebar-link group flex items-center px-3 py-2 text-sm font-medium text-gray-600 border-l-4 border-transparent hover:bg-blue-50 hover:text-gray-900">
+                        <span class="truncate">History</span>
+                    </a>
+                    <a href="#impact"
+                        class="sidebar-link group flex items-center px-3 py-2 text-sm font-medium text-gray-600 border-l-4 border-transparent hover:bg-blue-50 hover:text-gray-900">
+                        <span class="truncate">Impact</span>
+                    </a>
                     <a href="#team"
                         class="sidebar-link group flex items-center px-3 py-2 text-sm font-medium text-gray-600 border-l-4 border-transparent hover:bg-blue-50 hover:text-gray-900">
                         <span class="truncate">The Team</span>
@@ -228,7 +235,7 @@
                     </p>
                 </section>
 
-                <!-- History Section --
+                <!-- History Section -->
                 <section id="history" class="scroll-mt-32 lg:scroll-mt-24">
                     <h2><i class="ph ph-clock-counter-clockwise mr-3 text-gsoc-blue"></i> History</h2>
                     <p>
@@ -244,7 +251,7 @@
                             for digital mentorship.</li>
                         <li><strong>2025:</strong> Celebrating 20 years of open source innovation!</li>
                     </ul>
-                </section> -->
+                </section>
 
                 <!------ Impact Section 
                 <section id="impact" class="scroll-mt-32 lg:scroll-mt-24">
