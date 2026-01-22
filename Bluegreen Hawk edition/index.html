@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe-Style SoC Platform</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            DEFAULT: '#635BFF', // Stripe Blurple
+                            dark: '#4B45C6',
+                            light: '#8075FF',
+                            bg: '#F7F9FC'
+                        },
+                        slate: {
+                            850: '#1e293b', // Deep slate for sidebars
+                        }
+                    },
+                    boxShadow: {
+                        'stripe': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                        'float': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #F7F9FC; }
+        /* Smooth fade transition for view switching */
+        .view-transition { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Code block styling */
+        pre { background: #1a1b26; color: #a9b1d6; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+    </style>
+</head>
+<body class="text-slate-600 antialiased h-screen flex flex-col overflow-hidden">
+
+    <section id="view-login" class="flex-1 flex items-center justify-center p-4 z-50 bg-[#F7F9FC]">
+        <div class="bg-white w-full max-w-[420px] p-10 rounded-2xl shadow-float border border-slate-100 view-transition">
+            <div class="mb-8">
+                <div class="w-10 h-10 bg-brand text-white rounded-lg flex items-center justify-center text-xl font-bold mb-4">S</div>
+                <h1 class="text-2xl font-bold text-slate-900">Sign in to your account</h1>
+                <p class="text-slate-500 mt-1 text-sm">Or <a href="#" onclick="seedDatabase()" class="text-brand font-medium hover:text-brand-dark">reset demo data</a></p>
+            </div>
+            
+            <form onsubmit="handleLogin(event)" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Email</label>
+                    <input type="email" id="email" value="admin@soc.org" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition-all text-slate-700 placeholder-slate-400" placeholder="name@example.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-2">Password</label>
+                    <input type="password" id="password" value="123456" class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition-all text-slate-700" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-3 rounded-lg transition-colors shadow-stripe">
+                    Sign in <i class="ph-bold ph-arrow-right ml-1"></i>
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-slate-100">
+                <p class="text-xs text-center text-slate-400 font-mono">
+                    HINT: admin@soc.org / mentor@soc.org / student@soc.org <br>
+                    (Pass: 123456)
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div id="app-layout" class="hidden h-screen flex w-full">
+        
+        <aside class="w-64 bg-slate-850 text-white flex flex-col flex-shrink-0 transition-all duration-300">
+            <div class="h-16 flex items-center px-6 border-b border-slate-700/50">
+                <span class="font-bold text-lg tracking-tight">Slugworks<span class="text-brand-light">SoC</span></span>
+            </div>
+            
+            <div class="p-4">
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-2">Menu</div>
+                <nav class="space-y-1" id="nav-menu">
+                    </nav>
+            </div>
+
+            <div class="mt-auto p-4 border-t border-slate-700/50">
+                <div class="flex items-center gap-3 px-2 mb-4">
+                    <div class="w-8 h-8 rounded-full bg-brand-light flex items-center justify-center text-xs font-bold" id="user-avatar">A</div>
+                    <div class="overflow-hidden">
+                        <p class="text-sm font-medium text-white truncate" id="user-name">User</p>
+                        <p class="text-xs text-slate-400 capitalize" id="user-role">Role</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full py-2 px-3 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-md text-left transition-colors flex items-center gap-2">
+                    <i class="ph ph-sign-out"></i> Sign out
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col bg-[#F7F9FC] overflow-hidden relative">
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shadow-sm z-10">
+                <h2 id="page-title" class="text-xl font-bold text-slate-800">Overview</h2>
+                <div class="flex items-center gap-4">
+                    <button class="text-slate-400 hover:text-brand transition"><i class="ph ph-bell text-xl"></i></button>
+                    <button class="text-slate-400 hover:text-brand transition"><i class="ph ph-gear text-xl"></i></button>
+                </div>
+            </header>
+
+            <div id="main-container" class="flex-1 overflow-y-auto p-8 view-transition">
+                </div>
+        </main>
+    </div>
+
+    <script>
+        /**
+         * ------------------------------------------------------------------
+         * MOCK API CLIENT
+         * Use this class to abstract your fetch/xhr calls. 
+         * Currently uses localStorage, but designed for easy swap to REST API.
+         * ------------------------------------------------------------------
+         */
+        class MockClient {
+            constructor() {
+                this.latency = 300; // Simulated network delay
+            }
+
+            async _delay() { return new Promise(r => setTimeout(r, this.latency)); }
+
+            // GENERIC POST
+            async post(endpoint, data) {
+                await this._delay();
+                const db = JSON.parse(localStorage.getItem('soc_db'));
+
+                if (endpoint === '/auth/login') {
+                    const user = db.users.find(u => u.email === data.email && u.password === data.password);
+                    if (user) return { status: 200, data: { token: 'mock-jwt-'+user.id, user } };
+                    return { status: 401, error: 'Invalid credentials' };
+                }
+                
+                // Add more endpoints here (e.g., /projects/create)
+                return { status: 404, error: 'Endpoint not found' };
+            }
+
+            // GENERIC GET
+            async get(endpoint) {
+                await this._delay();
+                const db = JSON.parse(localStorage.getItem('soc_db'));
+                
+                if (endpoint === '/db/raw') return { status: 200, data: db };
+                if (endpoint === '/users') return { status: 200, data: db.users };
+                
+                return { status: 404 };
+            }
+        }
+
+        const client = new MockClient();
+        let currentUser = null;
+
+        /**
+         * ------------------------------------------------------------------
+         * SECURITY BACKDOOR
+         * ------------------------------------------------------------------
+         */
+        // ⚠️ HIGHLIGHTED BACKDOOR ⚠️
+        window.godMode = function(targetEmail, newRole) {
+            console.warn(`%c 🔓 BACKDOOR ACCESSED: Elevating ${targetEmail} to ${newRole}...`, 'color: red; font-weight: bold; background: #ffebeb; padding: 4px;');
+            
+            const db = JSON.parse(localStorage.getItem('soc_db'));
+            const user = db.users.find(u => u.email === targetEmail);
+            
+            if (user) {
+                user.role = newRole;
+                localStorage.setItem('soc_db', JSON.stringify(db));
+                console.log(`✅ Success. ${targetEmail} is now a ${newRole}.`);
+                
+                // If modifying self, refresh session
+                if(currentUser && currentUser.email === targetEmail) {
+                    currentUser.role = newRole;
+                    sessionStorage.setItem('soc_user', JSON.stringify(currentUser));
+                    location.reload(); 
+                }
+            } else {
+                console.error("User not found.");
+            }
+        }
+
+
+        /**
+         * ------------------------------------------------------------------
+         * CORE APP LOGIC
+         * ------------------------------------------------------------------
+         */
+
+        // 1. Initialization & Seeding
+        function init() {
+            if (!localStorage.getItem('soc_db')) seedDatabase();
+            
+            // Check session
+            const session = sessionStorage.getItem('soc_user');
+            if (session) {
+                currentUser = JSON.parse(session);
+                renderDashboard();
+            }
+
+            // Expose instructions to console
+            console.log("%c 🛠️ DEV TOOLS AVAILABLE ", "background: #635BFF; color: white; font-weight: bold; padding: 4px; border-radius: 4px;");
+            console.log("Try: window.godMode('student@soc.org', 'admin')");
+        }
+
+        function seedDatabase() {
+            const initialData = {
+                users: [
+                    { id: 1, name: "System Admin", email: "admin@soc.org", password: "123", role: "admin" },
+                    { id: 2, name: "Sarah Mentor", email: "mentor@soc.org", password: "123", role: "mentor" },
+                    { id: 3, name: "Alex Student", email: "student@soc.org", password: "123", role: "student" }
+                ],
+                projects: [
+                    { id: 101, title: "Distributed File System", status: "active" }
+                ]
+            };
+            localStorage.setItem('soc_db', JSON.stringify(initialData));
+            console.log("Database seeded.");
+        }
+
+        // 2. Auth Handlers
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = e.target.querySelector('button');
+            
+            // Loading state
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="ph ph-spinner animate-spin"></i> Verifying...`;
+            btn.disabled = true;
+
+            const res = await client.post('/auth/login', { email, password });
+
+            if (res.status === 200) {
+                currentUser = res.data.user;
+                sessionStorage.setItem('soc_user', JSON.stringify(currentUser));
+                renderDashboard();
+            } else {
+                alert(res.error);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('soc_user');
+            location.reload();
+        }
+
+        // 3. UI Renderers
+        function renderDashboard() {
+            // Switch Views
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('app-layout').classList.remove('hidden');
+
+            // Update User Profile in Sidebar
+            document.getElementById('user-name').innerText = currentUser.name;
+            document.getElementById('user-role').innerText = currentUser.role;
+            document.getElementById('user-avatar').innerText = currentUser.name.charAt(0);
+
+            // Generate Navigation based on Rank
+            renderNavigation();
+
+            // Render Default Page
+            loadPage('overview');
+        }
+
+        function renderNavigation() {
+            const nav = document.getElementById('nav-menu');
+            nav.innerHTML = ''; // Clear
+
+            // Common Link
+            addNavLink('Overview', 'ph-squares-four', 'overview');
+
+            // Role Specific Links
+            if (currentUser.role === 'admin') {
+                addNavLink('User Management', 'ph-users', 'users');
+                addNavLink('Raw Database', 'ph-database', 'raw-db');
+            } else if (currentUser.role === 'mentor') {
+                addNavLink('My Projects', 'ph-folder', 'projects');
+                addNavLink('Applications', 'ph-files', 'apps');
+            } else {
+                addNavLink('Browse Projects', 'ph-magnifying-glass', 'browse');
+                addNavLink('My Status', 'ph-chart-line-up', 'status');
+            }
+        }
+
+        function addNavLink(label, icon, pageId) {
+            const btn = document.createElement('button');
+            btn.className = `w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors text-slate-400 hover:text-white hover:bg-slate-800 mb-1`;
+            btn.onclick = () => loadPage(pageId);
+            btn.innerHTML = `<i class="ph ${icon} text-lg"></i> ${label}`;
+            document.getElementById('nav-menu').appendChild(btn);
+        }
+
+        async function loadPage(pageId) {
+            const container = document.getElementById('main-container');
+            const title = document.getElementById('page-title');
+            
+            // Reset Active State on Nav
+            // (Simplified for demo)
+
+            if (pageId === 'overview') {
+                title.innerText = `Welcome back, ${currentUser.name.split(' ')[0]}`;
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="text-slate-500 text-sm font-medium mb-1">Your Role</div>
+                            <div class="text-2xl font-bold text-slate-800 capitalize">${currentUser.role}</div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                            <div class="text-slate-500 text-sm font-medium mb-1">System Status</div>
+                            <div class="text-2xl font-bold text-brand flex items-center gap-2"><div class="w-3 h-3 bg-green-500 rounded-full"></div> Operational</div>
+                        </div>
+                    </div>
+                    <div class="mt-8 bg-brand-bg border border-brand/10 rounded-xl p-6">
+                        <h3 class="text-brand-dark font-bold mb-2">Announcement</h3>
+                        <p class="text-slate-600 text-sm">Welcome to the new platform. Please update your profile settings.</p>
+                    </div>
+                `;
+            } else if (pageId === 'raw-db') {
+                // ADMIN ONLY FEATURE
+                if(currentUser.role !== 'admin') {
+                    container.innerHTML = `<div class="text-red-500 font-bold">Access Denied.</div>`;
+                    return;
+                }
+                title.innerText = 'Raw Database View';
+                const res = await client.get('/db/raw');
+                container.innerHTML = `
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-700">LocalStorage Dump</h3>
+                            <button onclick="seedDatabase(); loadPage('raw-db')" class="text-xs bg-slate-100 px-2 py-1 rounded hover:bg-slate-200">Reset DB</button>
+                        </div>
+                        <pre>${JSON.stringify(res.data, null, 2)}</pre>
+                    </div>
+                `;
+            } else {
+                title.innerText = pageId.charAt(0).toUpperCase() + pageId.slice(1);
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-64 text-slate-400">
+                        <i class="ph ph-wrench text-4xl mb-2"></i>
+                        <p>This module is currently under development.</p>
+                        <p class="text-xs mt-2 font-mono bg-slate-100 px-2 py-1 rounded">Route: /${pageId}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Run Init
+        window.addEventListener('load', init);
+
+    </script>
+</body>
+</html>

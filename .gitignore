@@ -1,2 +1,5 @@
-#ECHO is on.
 *.bat
+*notes/
+*.env
+*node_modules/
+
