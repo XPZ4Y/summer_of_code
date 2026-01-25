@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSS Terminal</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --green: #2ea043;
+            --blue: #58a6ff;
+            --gray: #8b949e;
+            --red: #ff7b72;
+            --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--gray);
+            font-family: var(--mono);
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            font-size: 16px;
+        }
+
+        #terminal-output {
+            flex: 1;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+            scrollbar-width: thin;
+            scrollbar-color: #30363d transparent;
+        }
+
+        .line { margin-bottom: 4px; display: block; line-height: 1.5; }
+        .success { color: var(--green); }
+        .info { color: var(--blue); }
+        .error { color: var(--red); }
+        .cmd-echo { color: #fff; font-weight: bold; margin-top: 10px; }
+        .muted { opacity: 0.6; }
+
+        #input-area {
+            display: flex;
+            align-items: center;
+            border-top: 1px solid #30363d;
+            padding-top: 15px;
+        }
+
+        #prompt {
+            color: var(--green);
+            margin-right: 12px;
+            font-weight: bold;
+        }
+
+        #cmd-input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: var(--mono);
+            font-size: 16px;
+            flex: 1;
+            outline: none;
+        }
+
+        /* Hidden Google Auth Container */
+        #google-auth-zone {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="terminal-output">
+        <div class="line info">OSS System v1.0.0</div>
+        <div class="line">Type 'help' to see available commands.</div>
+        <br>
+    </div>
+
+    <div id="google-auth-zone"></div>
+
+    <div id="input-area">
+        <span id="prompt">guest@oss:~$</span>
+        <input type="text" id="cmd-input" autofocus autocomplete="off" spellcheck="false">
+    </div>
+
+<script>
+    // --- CONFIGURATION ---
+    // Update this URL if your backend is hosted elsewhere
+    const API_URL = 'http://localhost:3000/api'; 
+    const GOOGLE_CLIENT_ID = "611302719944-al8ofvtj4rg27ev0m2dk5cnr7u5bqv90.apps.googleusercontent.com"; 
+
+    // --- STATE ---
+    let token = localStorage.getItem('oss_token');
+    let user = null;
+
+    // --- DOM ---
+    const outputDiv = document.getElementById('terminal-output');
+    const inputField = document.getElementById('cmd-input');
+    const promptSpan = document.getElementById('prompt');
+    const authZone = document.getElementById('google-auth-zone');
+
+    // --- INIT ---
+    window.onload = () => {
+        if (token) validateToken();
+        inputField.focus();
+        document.addEventListener('click', () => inputField.focus());
+    };
+
+    // --- TERMINAL UTILS ---
+    function log(text, type = '') {
+        const div = document.createElement('div');
+        div.className = `line ${type}`;
+        div.textContent = text;
+        outputDiv.appendChild(div);
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+    }
+
+    inputField.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter') {
+            const cmdRaw = inputField.value.trim();
+            if (!cmdRaw) return;
+            
+            log(`${promptSpan.textContent} ${cmdRaw}`, 'cmd-echo');
+            inputField.value = '';
+            
+            await execute(cmdRaw);
+        }
+    });
+
+    // --- COMMAND ROUTER ---
+    async function execute(raw) {
+        // Split by space, but respect quotes could be added later. 
+        // For now simple split is fine for this specific CLI.
+        const parts = raw.split(' ');
+        const cmd = parts[0].toLowerCase();
+        const args = parts.slice(1);
+
+        switch (cmd) {
+            case 'help':
+                log(`
+  COMMANDS:
+  ---------
+  login                 : Authenticate via Google
+  logout                : End session
+  me                    : Display current user details
+  
+  read                  : List all events
+  view <id>             : View event details & comments
+  join <id>             : Join an event
+  
+  write <title>|<date>|<loc>: Create event (Format: Title | YYYY-MM-DD | Loc)
+  rm <id>               : Delete your event
+  say <id> <text>       : Comment on an event
+  
+  cls                   : Clear screen
+                `, 'info');
+                break;
+
+            case 'cls':
+            case 'clear':
+                outputDiv.innerHTML = '';
+                break;
+
+            case 'login':
+                token ? log('Already logged in.', 'error') : initGoogleAuth();
+                break;
+
+            case 'logout':
+                localStorage.removeItem('oss_token');
+                token = null; user = null;
+                updatePrompt();
+                log('Logged out.', 'success');
+                break;
+
+            case 'me':
+                user ? log(JSON.stringify(user, null, 2), 'success') : log('Guest mode.', 'error');
+                break;
+            case 'mejoin':
+                user ? log(JSON.stringify(user.joinedEvents, null, 2), 'success') : log('Guest mode.', 'error');
+                break;
+
+            case 'read':
+                await fetchEvents();
+                break;
+
+            case 'view':
+                args[0] ? await viewEvent(args[0]) : log('Usage: view <event_id>', 'error');
+                break;
+
+            case 'join':
+                args[0] ? await apiPost('/events/join', { eventId: args[0] }) : log('Usage: join <event_id>', 'error');
+                break;
+
+            case 'rm':
+                args[0] ? await deleteEvent(args[0]) : log('Usage: rm <event_id>', 'error');
+                break;
+
+            case 'say':
+                if (args.length < 2) {
+                    log('Usage: say <event_id> <message>', 'error');
+                } else {
+                    const id = args[0];
+                    const text = args.slice(1).join(' ');
+                    await apiPost('/events/comment', { eventId: id, text: text });
+                }
+                break;
+
+            case 'write':
+                const payloadStr = args.join(' ');
+                if (!payloadStr.includes('|')) {
+                    log('Usage: mk Title | YYYY-MM-DD | Location', 'error');
+                } else {
+                    await createEvent(payloadStr);
+                }
+                break;
+
+            default:
+                log(`Unknown command: ${cmd}`, 'error');
+        }
+    }
+
+    // --- API CLIENT ---
+
+    // Generic Fetch Wrapper
+    async function apiCall(endpoint, options = {}) {
+        try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const config = { ...options, headers: { ...headers, ...options.headers } };
+            const res = await fetch(`${API_URL}${endpoint}`, config);
+            
+            // Handle empty responses (like standard DELETE)
+            if (res.status === 204) return { success: true };
+
+            const data = await res.json();
+            
+            if (!res.ok) throw new Error(data.error || 'Request failed');
+            return data;
+        } catch (e) {
+            log(`Error: ${e.message}`, 'error');
+            return null;
+        }
+    }
+
+    // specific helpers using wrapper
+    async function apiPost(endpoint, body) {
+        if (!token) return log('Login required.', 'error');
+        const data = await apiCall(endpoint, { method: 'POST', body: JSON.stringify(body) });
+        if (data && (data.success || data.eventId)) log('Operation successful.', 'success');
+    }
+
+    async function validateToken() {
+        log("Validating tokens")
+        const data = await apiCall('/auth/me');
+        if (data) {
+            user = data;
+            updatePrompt();
+            log(`Restored session: ${user.name}`, 'success');
+        } else {
+            localStorage.removeItem('oss_token');
+            token = null;
+        }
+    }
+
+    async function fetchEvents() {
+        const data = await apiCall('/events');
+        if (!data || data.length === 0) return log('No events found.', 'info');
+
+        log(`--- ${data.length} Events ---`, 'info');
+        data.forEach(e => {
+            log(`[${e._id}] ${e.date} | ${e.title} | ${e.location}`);
+        });
+        log('---------------------');
+    }
+
+    async function viewEvent(id) {
+        // Fetch all and filter client side (since API doesn't have GET /events/:id)
+        const all = await apiCall('/events');
+        if(!all) return;
+
+        const e = all.find(ev => ev._id === id);
+        if (!e) return log('Event not found.', 'error');
+
+        log(`
+[EVENT DETAIL]
+ID:      ${e._id}
+TITLE:   ${e.title}
+HOST:    ${e.creatorName}
+DATE:    ${e.date} @ ${e.time}
+LOC:     ${e.location}
+DESC:    ${e.description}
+ATTENDEES: ${e.attendees ? e.attendees.length : 0}
+        `, 'info');
+
+        if (e.comments && e.comments.length > 0) {
+            log('COMMENTS:', 'cmd-echo');
+            e.comments.forEach(c => {
+                log(`  > ${c.userName}: ${c.text}`, 'muted');
+            });
+        } else {
+            log('No comments yet.', 'muted');
+        }
+    }
+
+    async function createEvent(str) {
+        if (!token) return log('Login required.', 'error');
+        
+        const parts = str.split('|').map(s => s.trim());
+        if(parts.length < 3) return log('Format: Title | Date | Location', 'error');
+
+        const [title, date, location] = parts;
+        
+        // Use JSON for app.js express.json() compatibility
+        const body = {
+            title, date, location,
+            time: '20:00',
+            description: 'Created via OSS CLI',
+            category: 'CLI',
+            image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b"
+        };
+
+        const res = await apiCall('/events', { method: 'POST', body: JSON.stringify(body) });
+        if (res && res.success) log(`Event created. ID: ${res.eventId}`, 'success');
+    }
+
+    async function deleteEvent(id) {
+        if (!token) return log('Login required.', 'error');
+        
+        log('Deleting...', 'info');
+        const res = await apiCall(`/events/${id}`, { method: 'DELETE' });
+        
+        // Check manual success flag or implicit status
+        if (res && res.success) {
+            log(`Event ${id} deleted.`, 'success');
+        }
+    }
+
+    // --- GOOGLE AUTH FLOW ---
+    function initGoogleAuth() {
+        if (!window.google) return log('Google API not loaded.', 'error');
+        
+        authZone.style.display = 'block';
+        log('Waiting for Google login...', 'info');
+
+        google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleResponse
+        });
+        
+        google.accounts.id.renderButton(authZone, { theme: "filled_black", size: "large" });
+    }
+
+    async function handleGoogleResponse(response) {
+        authZone.style.display = 'none';
+        
+        const data = await apiCall('/auth/google', { 
+            method: 'POST', 
+            body: JSON.stringify({ token: response.credential }) 
+        });
+
+        if (data && data.success) {
+            token = data.token;
+            user = data.user;
+            localStorage.setItem('oss_token', token);
+            updatePrompt();
+            log(`Authenticated as ${user.name}`, 'success');
+        }
+    }
+
+    function updatePrompt() {
+        if (user) {
+            const name = user.name.split(' ')[0].toLowerCase();
+            promptSpan.textContent = `${name}@oss:~$`;
+            promptSpan.style.color = 'var(--blue)';
+        } else {
+            promptSpan.textContent = 'guest@oss:~$';
+            promptSpan.style.color = 'var(--green)';
+        }
+    }
+</script>
+</body>
+</html>

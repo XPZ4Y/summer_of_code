@@ -1,0 +1,6 @@
+*.bat
+*notes/
+*.env
+*node_modules/
+*Jimmytext.md
+

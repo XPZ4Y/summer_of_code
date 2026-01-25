@@ -1,17 +1,16 @@
 {
-  "name": "Bluegreen Hawk edition",
+  "name": "Open source summer",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Summer hackathon",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.28.0",
   "dependencies": {
-    "cloudinary": "^2.9.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
@@ -19,9 +18,9 @@
     "google-auth-library": "^10.5.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.0.0",
-    "multer": "^2.0.2",
-    "package-lock-only": "^0.0.4",
-    "supertest": "^7.2.2",
-    "vitest": "^4.0.17"
+    "supertest": "^7.2.2"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   }
 }

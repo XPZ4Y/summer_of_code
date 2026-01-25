@@ -1,12 +1,11 @@
 const request = require('supertest');
 const { ObjectId } = require('mongodb');
-import { describe, it, expect, vi, beforeAll, afterAll, test } from 'vitest';
-import { app, connectToMongoDB, closeMongoDB } from './app';
+const { app, connectToMongoDB, closeMongoDB } = require('./app');
 
 // MOCKS
-vi.mock('google-auth-library', () => ({
-  OAuth2Client: vi.fn().mockImplementation(() => ({
-    verifyIdToken: vi.fn().mockImplementation(async ({ idToken }) => {
+jest.mock('google-auth-library', () => ({
+  OAuth2Client: jest.fn().mockImplementation(() => ({
+    verifyIdToken: jest.fn().mockImplementation(async ({ idToken }) => {
       if (idToken === 'VALID_GOOGLE_TOKEN') {
         return {
           getPayload: () => ({
@@ -24,24 +23,24 @@ vi.mock('google-auth-library', () => ({
 const mockDb = { users: [], events: [] };
 
 const mockCollection = (collectionName) => ({
-  createIndex: vi.fn(),
-  findOne: vi.fn(async (query) => {
+  createIndex: jest.fn(),
+  findOne: jest.fn(async (query) => {
     const col = mockDb[collectionName];
     if (query._id) return col.find(d => d._id.toString() === query._id.toString()) || null;
     if (query.email) return col.find(d => d.email === query.email) || null;
     return null;
   }),
-  find: vi.fn(() => ({
-    sort: vi.fn(() => ({
-      toArray: vi.fn(async () => [...mockDb[collectionName]])
+  find: jest.fn(() => ({
+    sort: jest.fn(() => ({
+      toArray: jest.fn(async () => [...mockDb[collectionName]])
     }))
   })),
-  deleteOne: vi.fn(async (query) => {
+  deleteOne: jest.fn(async (query) => {
     const initialLen = mockDb[collectionName].length;
     mockDb[collectionName] = mockDb[collectionName].filter(d => d._id.toString() !== query._id.toString());
     return { deletedCount: initialLen - mockDb[collectionName].length };
   }),
-  findOneAndUpdate: vi.fn(async (query, update, options) => {
+  findOneAndUpdate: jest.fn(async (query, update, options) => {
     let doc = mockDb[collectionName].find(d => d.email === query.email);
     if (!doc && options.upsert) {
       doc = { _id: new ObjectId(), email: query.email, ...update.$setOnInsert, ...update.$set };
@@ -51,12 +50,12 @@ const mockCollection = (collectionName) => ({
     }
     return { value: doc };
   }),
-  insertOne: vi.fn(async (doc) => {
+  insertOne: jest.fn(async (doc) => {
     const newDoc = { ...doc, _id: new ObjectId() };
     mockDb[collectionName].push(newDoc);
     return { insertedId: newDoc._id };
   }),
-  updateOne: vi.fn(async (query, update) => {
+  updateOne: jest.fn(async (query, update) => {
     const doc = mockDb[collectionName].find(d => d._id.toString() === query._id.toString());
     let modifiedCount = 0;
     if (doc) {
@@ -92,14 +91,14 @@ const mockCollection = (collectionName) => ({
   })
 });
 
-vi.mock('mongodb', () => {
-  const actualMongo = vi.requireActual('mongodb');
+jest.mock('mongodb', () => {
+  const actualMongo = jest.requireActual('mongodb');
   return {
     ...actualMongo,
-    MongoClient: vi.fn().mockImplementation(() => ({
-      connect: vi.fn().mockResolvedValue(true),
-      db: vi.fn(() => ({ collection: vi.fn((name) => mockCollection(name)) })),
-      close: vi.fn()
+    MongoClient: jest.fn().mockImplementation(() => ({
+      connect: jest.fn().mockResolvedValue(true),
+      db: jest.fn(() => ({ collection: jest.fn((name) => mockCollection(name)) })),
+      close: jest.fn()
     }))
   };
 });
@@ -126,6 +125,7 @@ describe('API Integration Flow', () => {
     
     expect(authToken).toBeDefined();
   });
+  
 
   test('GET /api/auth/me (Session Check)', async () => {
     const res = await request(app)
