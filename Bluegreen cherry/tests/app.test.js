@@ -1,6 +1,6 @@
 const request = require('supertest');
 const { ObjectId } = require('mongodb');
-const { app, connectToMongoDB, closeMongoDB } = require('./app');
+const { app, connectToMongoDB, closeMongoDB } = require('../src/app');
 
 // MOCKS
 jest.mock('google-auth-library', () => ({
@@ -33,7 +33,8 @@ const mockCollection = (collectionName) => ({
   find: jest.fn(() => ({
     sort: jest.fn(() => ({
       toArray: jest.fn(async () => [...mockDb[collectionName]])
-    }))
+    })),
+    toArray: jest.fn(async () => [...mockDb[collectionName]])
   })),
   deleteOne: jest.fn(async (query) => {
     const initialLen = mockDb[collectionName].length;
@@ -88,7 +89,8 @@ const mockCollection = (collectionName) => ({
       }
     }
     return { matchedCount: doc ? 1 : 0, modifiedCount };
-  })
+  }),
+  updateMany: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
 });
 
 jest.mock('mongodb', () => {
@@ -104,7 +106,7 @@ jest.mock('mongodb', () => {
 });
 
 describe('API Integration Flow', () => {
-  let authToken; // CHANGED: Using Token instead of Cookie
+  let authToken;
   let userId;
   let eventId;
 
@@ -119,7 +121,7 @@ describe('API Integration Flow', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
     
-    // CHANGED: Capture Token from Body
+
     userId = res.body.user._id;
     authToken = res.body.token; 
     
@@ -130,7 +132,7 @@ describe('API Integration Flow', () => {
   test('GET /api/auth/me (Session Check)', async () => {
     const res = await request(app)
       .get('/api/auth/me')
-      .set('Authorization', `Bearer ${authToken}`); // CHANGED: Header based auth
+      .set('Authorization', `Bearer ${authToken}`); 
     
     expect(res.statusCode).toBe(200);
     expect(res.body.name).toBe('Test User');

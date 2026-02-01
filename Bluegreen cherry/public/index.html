@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenSourceSummer | Minimal</title>
+
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <script defer src="api.js"></script>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+
+    <div id="toast"></div>
+
+    <header class="hero" id="hero">
+        <div class="hero-bg" id="heroBg"></div>
+        <div class="hero-content" id="heroContent">
+            <h1>Open Source Summer</h1>
+            <p>The Tech. The Mech. The Vibes.</p>
+        </div>
+        <div class="scroll-indicator">↓</div>
+    </header>
+
+    <nav class="navbar" id="mainNav">
+        <div class="nav-brand">OpenSourceSummer</div>
+        <div class="nav-links">
+            <button class="nav-item active" onclick="switchView('home', this)">Projects</button>
+            <button class="nav-item" onclick="switchView('passes', this)">Passes</button>
+            <button class="nav-item accent-btn" onclick="document.getElementById('createModal').classList.remove('hidden')">+</button>
+            <button class="nav-item" onclick="switchView('host', this)">Host</button>
+            <button class="nav-item" onclick="switchView('settings', this)">Profile</button>
+        </div>
+        <div class="user-badge-desktop" id="headerName">GUEST</div>
+    </nav>
+
+    <main id="mainContent">
+        
+        <div id="authScreen" class="modal hidden login-overlay">
+            <div class="login-window">
+                
+                <div class="login-slider">
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80');"></div>
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80');"></div>
+                    <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80');"></div>
+                    
+                    <div class="slider-overlay">
+                        <h3>OPEN SOURCE SUMMER</h3>
+                    </div>
+                </div>
+
+                <div class="login-content">
+                    <h1 style="color:var(--accent); margin-bottom: 10px; letter-spacing: -1px;">ACCESS GRID</h1>
+                    <p style="margin-bottom: 40px; color: var(--text-muted); font-size: 0.9rem;">
+                        Authenticate identity to proceed.<br>
+                        Protocol: Secure Minimalist.
+                    </p>
+                    
+                    <div id="googleBtnContainer"></div>
+                    
+                    <div style="margin-top: auto; font-size: 0.75rem; color: #444;">
+                        System v2.0 // Ready
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <section id="viewHome" class="active">
+            <div class="search-row">
+                <input type="text" id="searchInput" placeholder="Search frequencies..." onkeyup="handleSearch(this.value)">
+                <select id="filterSelect" onchange="applyFilter(this.value)">
+                    <option value="ALL">ALL</option>
+                    <option value="PARTY">PARTY</option>
+                    <option value="RACE">RACE</option>
+                    <option value="SHOW">SHOW</option>
+                    <option value="MEET">MEET</option>
+                </select>
+            </div>
+            <div id="clubsContainer"></div>
+        </section>
+
+        <section id="viewPasses">
+            <h2 class="section-title">MY PASSES</h2>
+            <div id="passesContainer"></div>
+        </section>
+
+        <section id="viewHost">
+            <div class="flex-between mb-15">
+                <h2>HOST CONTROL</h2>
+            </div>
+            <div id="hostContainer"></div>
+        </section>
+
+        <section id="viewSettings">
+            <h2 class="section-title">PROFILE</h2>
+            <form onsubmit="saveProfile(event)">
+                <label>Full Name</label>
+                <input type="text" id="pName" required>
+                
+                <label>Email (Locked)</label>
+                <input type="email" id="pEmail" disabled style="opacity: 0.5;">
+                
+                <label>Phone</label>
+                <input type="tel" id="pPhone">
+                
+                <label>Sector / City</label>
+                <input type="text" id="pCity">
+
+                <button type="submit" class="btn mt-10">SAVE DATA</button>
+            </form>
+            <button onclick="logout()" class="btn outline error-btn mt-20">LOGOUT</button>
+        </section>
+    </main>
+
+    <div id="createModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="color: var(--accent); margin-bottom: 15px;">NEW DROP</h2>
+            <form onsubmit="handleCreate(event)">
+                <input type="text" id="cName" placeholder="Event Title" required>
+                
+                <label class="text-xs muted">Category</label>
+                <select id="cCategory">
+                    <option value="PARTY">PARTY</option>
+                    <option value="RACE">RACE</option>
+                    <option value="SHOW">SHOW</option>
+                    <option value="MEET">MEET</option>
+                </select>
+
+                <textarea id="cDesc" placeholder="Description / Instructions" required></textarea>
+
+                <div class="grid-2">
+                    <input type="date" id="cDate" required>
+                    <input type="time" id="cTime" required>
+                </div>
+                <input type="text" id="cLoc" placeholder="Location" required>
+                
+                <div class="grid-2">
+                    <input type="number" id="cPrice" placeholder="Price ($)">
+                    <input type="number" id="cMax" placeholder="Max Capacity">
+                </div>
+
+                <div class="flex-gap mt-15">
+                    <button type="button" class="btn outline" onclick="document.getElementById('createModal').classList.add('hidden')">CANCEL</button>
+                    <button type="submit" class="btn">PUBLISH</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="detailsModal" class="modal hidden">
+        <div class="modal-content">
+            <div id="detailsContent"></div>
+            <button class="btn outline mt-15" onclick="document.getElementById('detailsModal').classList.add('hidden')">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="qrDisplayModal" class="modal hidden">
+        <div class="modal-content text-center bg-white text-black">
+            <h2 id="qrPassTitle" class="mb-5">TITLE</h2>
+            <div id="qrPassMeta" class="mb-20 font-mono">DATE</div>
+            <div id="qrModalTarget" class="flex-center"></div>
+            <div id="qrPassUser" class="mt-20 font-bold">USER</div>
+            <button class="btn mt-20 bg-black text-white" onclick="document.getElementById('qrDisplayModal').classList.add('hidden')">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="scannerModal" class="modal hidden">
+        <div class="modal-content">
+            <div id="reader"></div>
+            <button class="btn outline" onclick="stopScanner()">STOP SCAN</button>
+        </div>
+    </div>
+
+    <div id="scanResultModal" class="modal hidden">
+        <div class="modal-content text-center">
+            <h1 id="scanStatus" style="font-size: 2rem;">STATUS</h1>
+            <p id="scanName" class="mb-20 font-mono">User Info</p>
+            <button class="btn" onclick="document.getElementById('scanResultModal').classList.add('hidden'); startScanner();">SCAN NEXT</button>
+            <button class="btn outline mt-10" onclick="document.getElementById('scanResultModal').classList.add('hidden')">DONE</button>
+        </div>
+    </div>
+
+    <div id="hostDetailModal" class="modal hidden">
+        <div class="modal-content">
+            <div id="hostDetailContent"></div>
+            <button class="btn outline mt-15" onclick="document.getElementById('hostDetailModal').classList.add('hidden')">CLOSE</button>
+        </div>
+    </div>
+
+    <script>
+        // --- PARALLAX & SCROLL EFFECT ---
+        const heroBg = document.getElementById('heroBg');
+        const heroContent = document.getElementById('heroContent');
+        const nav = document.getElementById('mainNav');
+
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const heroHeight = document.getElementById('hero').offsetHeight;
+
+            // Parallax & Darken
+            if (scrollY < heroHeight) {
+                heroBg.style.transform = `translateY(${scrollY * 0.5}px)`;
+                // Darken opacity: 0 at top, 0.8 at bottom of hero
+                const opacity = Math.min(0.9, (scrollY / heroHeight) * 1.5); 
+                heroBg.style.filter = `brightness(${1 - opacity})`;
+                heroContent.style.opacity = 1 - (scrollY / (heroHeight * 0.6));
+                heroContent.style.transform = `translateY(${scrollY * 0.3}px)`;
+            }
+
+            // Navbar Sticky State
+            if (scrollY > heroHeight - 80) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // --- EXISTING LOGIC ---
+        let currentUser = null;
+        let currentEvents = []; 
+        let joinedEventIds = [];
+        let html5QrcodeScanner = null;
+        let currentSearch = '';
+        let currentFilter = 'ALL';
+
+        window.addEventListener('load', () => {
+            if(window.google) {
+                google.accounts.id.initialize({
+                    client_id: "611302719944-al8ofvtj4rg27ev0m2dk5cnr7u5bqv90.apps.googleusercontent.com", 
+                    callback: handleGoogleResponse
+                });
+                const btnContainer = document.getElementById("googleBtnContainer");
+                if(btnContainer) {
+                    google.accounts.id.renderButton(btnContainer, { theme: "filled_black", size: "large", width: "250" });
+                }
+            }
+            checkAuth();
+        });
+
+        async function handleGoogleResponse(response) {
+            try {
+                const data = await Cherry.auth.googleLogin(response.credential);
+                if(data.success) {
+                    localStorage.setItem('fida_token', data.token);
+                    checkAuth();
+                } else showToast('Login Failed');
+            } catch(e) { console.error(e); }
+        }
+
+        async function checkAuth() {
+            const token = localStorage.getItem('fida_token');
+            if (!token) {
+                document.getElementById('authScreen').classList.remove('hidden');
+                return;
+            }
+            try {
+                const user = await Cherry.auth.getMe();
+                currentUser = user;
+                joinedEventIds = currentUser.joinedEvents || [];
+                document.getElementById('authScreen').classList.add('hidden');
+                const headerName = document.getElementById('headerName');
+                if(headerName) headerName.innerText = currentUser.name;
+                fetchAndRenderFeed();
+                loadProfileData(); 
+            } catch (e) {
+                logout();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('fida_token');
+            location.reload();
+        }
+
+        function switchView(viewName, btnEl) {
+            document.querySelectorAll('section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            if(btnEl) btnEl.classList.add('active');
+            
+            const map = { 'home': 'viewHome', 'passes': 'viewPasses', 'host': 'viewHost', 'settings': 'viewSettings' };
+            document.getElementById(map[viewName]).classList.add('active');
+            
+            if(viewName === 'home') fetchAndRenderFeed();
+            
+            // Auto scroll past hero on click
+            if(window.scrollY < window.innerHeight - 50) {
+                 window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+            }
+        }
+
+        async function fetchAndRenderFeed() {
+            try {
+                currentEvents = await Cherry.events.getAll();
+                renderFeed();
+                renderPasses();
+                renderHostDashboard();
+            } catch (e) { showToast('Feed Error'); }
+        }
+
+        function renderFeed() {
+            const container = document.getElementById('clubsContainer');
+            container.innerHTML = '';
+            
+            let filtered = currentEvents.filter(item => 
+                (item.title.toLowerCase().includes(currentSearch) || item.location.toLowerCase().includes(currentSearch))
+            );
+            if (currentFilter !== 'ALL') filtered = filtered.filter(item => item.category === currentFilter);
+
+            if(filtered.length === 0) {
+                container.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">No Signals.</div>';
+                return;
+            }
+
+            filtered.forEach(event => {
+                const id = event._id || event.id;
+                const isJoined = joinedEventIds.includes(id);
+                const price = event.price ? `$${event.price}` : 'FREE';
+                
+                const html = `
+                    <div class="card ${isJoined ? 'status-joined' : ''}" onclick="openDetail('${id}')">
+                        <div style="display:flex; justify-content:space-between;">
+                            <h3>${event.title}</h3>
+                            <span style="color:var(--accent); font-weight:700;">${price}</span>
+                        </div>
+                        <div class="meta">
+                            <span>${formatDate(event.date)}</span>
+                            <span>${event.time}</span>
+                            <span class="tag">${event.category || 'EVENT'}</span>
+                        </div>
+                        <div style="margin-top:8px; color:var(--text-muted); font-size:0.9rem;">${event.location}</div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function renderPasses() {
+            const container = document.getElementById('passesContainer');
+            container.innerHTML = '';
+            const myEvents = currentEvents.filter(e => joinedEventIds.includes(e._id || e.id));
+
+            if(myEvents.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-muted);">No active projects.</div>';
+                return;
+            }
+
+            myEvents.forEach(event => {
+                const id = event._id || event.id;
+                const html = `
+                    <div class="card" style="border-left: 4px solid var(--accent);">
+                        <h3>${event.title}</h3>
+                        <div class="meta">${formatDate(event.date)} @ ${event.time}</div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function renderHostDashboard() {
+            const container = document.getElementById('hostContainer');
+            container.innerHTML = '';
+            const hosted = currentEvents.filter(x => x.creatorId === currentUser._id);
+
+            if(hosted.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-muted);">No events hosted.</div>';
+                return;
+            }
+
+            hosted.forEach(event => {
+                const count = event.attendees ? event.attendees.length : 0;
+                const html = `
+                    <div class="card" onclick="openHostDetail('${event._id}')">
+                        <h3>${event.title}</h3>
+                        <div class="meta">Guest List: ${count}</div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function handleSearch(val) { currentSearch = val.toLowerCase(); renderFeed(); }
+        function applyFilter(val) { currentFilter = val; renderFeed(); }
+
+        async function handleCreate(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerText = '...';
+            
+            const formData = new FormData();
+            formData.append('title', document.getElementById('cName').value);
+            formData.append('category', document.getElementById('cCategory').value);
+            formData.append('description', document.getElementById('cDesc').value);
+            formData.append('date', document.getElementById('cDate').value);
+            formData.append('time', document.getElementById('cTime').value);
+            formData.append('location', document.getElementById('cLoc').value);
+            formData.append('price', document.getElementById('cPrice').value || 0);
+            formData.append('maxAttendees', document.getElementById('cMax').value || 100);
+            formData.append('mode', 'offline');
+
+            try {
+                const res = await Cherry.events.create(formData);
+                if(res.success) {
+                    document.getElementById('createModal').classList.add('hidden');
+                    e.target.reset();
+                    fetchAndRenderFeed();
+                    showToast('Drop Created');
+                } else showToast('Error');
+            } catch(err) { console.log(err); }
+            btn.innerText = 'PUBLISH';
+        }
+
+        async function joinClub(id) {
+            try {
+                const res = await Cherry.events.join(id);
+                if(res.success) {
+                    joinedEventIds.push(id);
+                    showToast('Joined');
+                    document.getElementById('detailsModal').classList.add('hidden');
+                    fetchAndRenderFeed();
+                } else showToast(res.error || 'Failed');
+            } catch(e) { console.log(e); }
+        }
+
+        function openDetail(id) {
+            const event = currentEvents.find(e => (e._id || e.id) === id);
+            const isJoined = joinedEventIds.includes(id);
+            const content = document.getElementById('detailsContent');
+            
+            content.innerHTML = `
+                <h2 style="margin-bottom:10px;">${event.title}</h2>
+                <div class="meta" style="margin-bottom:20px;">${event.location} • ${event.date} \n• ${event.creatorName} • Joined: ${event.attendees.length}/${event.maxAttendees}</div>
+                <p style="color:var(--text-muted); margin-bottom:20px;">${event.description}</p>
+                ${ !isJoined ? `<button class="btn" onclick="joinClub('${id}')">GET PASS ($${event.price||0})</button>` : `<button class="btn outline" disabled>ALREADY JOINED</button>` }
+            `;
+            document.getElementById('detailsModal').classList.remove('hidden');
+        }
+
+        function openHostDetail(id) {
+            const event = currentEvents.find(e => (e._id || e.id) === id);
+            document.getElementById('hostDetailContent').innerHTML = `
+                <h2>${event.title}</h2>
+                <div class="meta">Attendees: ${event.attendees ? event.attendees.length : 0}</div>
+                
+            `;
+            document.getElementById('hostDetailModal').classList.remove('hidden');
+        }
+
+        async function loadProfileData() {
+           try {
+               const details = await Cherry.profile.loadDetails();
+               if(details) {
+                   document.getElementById('pName').value = currentUser.name || '';
+                   document.getElementById('pEmail').value = currentUser.email || '';
+                   document.getElementById('pPhone').value = details.phone || '';
+                   document.getElementById('pCity').value = details.city || '';
+               }
+           } catch(e) {}
+        }
+        
+        async function saveProfile(e) {
+            e.preventDefault();
+            showToast('Profile Saved');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2000);
+        }
+        function formatDate(d) { return new Date(d).toLocaleDateString(); }
+    </script>
+</body>
+</html>
